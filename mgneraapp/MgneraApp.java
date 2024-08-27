@@ -10,6 +10,7 @@
 
 package mgneraapp;
 
+import classes.BDODAO;
 import exceptions.LoginException;
 import exceptions.ProjectException;
 import exceptions.SignUpException;
@@ -19,6 +20,7 @@ public class MgneraApp {
     private int choice = 0;
     private final BDOMenu bdo = new BDOMenu();
     private final GPMMenu gpm = new GPMMenu();
+    private final BDODAO bd=new BDODAO();
 
     public int getChoice() {
         return choice;
@@ -71,7 +73,7 @@ public class MgneraApp {
         }
     }
 
-    private void handleBDOMenuOptions(Scanner sc) throws ProjectException {
+    private void handleBDOMenuOptions(Scanner sc) throws ProjectException, LoginException {
         System.out.println("""
                            
             ----------------- Welcome to BDO Functions -----------------
@@ -105,7 +107,7 @@ public class MgneraApp {
     }
 
     //manage gpm
-    public void manageGPM(Scanner sc) throws ProjectException{
+    public void manageGPM(Scanner sc) throws ProjectException, LoginException{
         while(true){
         System.out.println("""
             You selected option 1
@@ -132,7 +134,7 @@ public class MgneraApp {
               case 4 ->
                   bdo.deleteGPM();
                case 5 -> 
-                  bdo.viewAllGPMs();
+                  bd.viewAllGPMs();
                case 6 -> 
                {   
                    System.out.println("Exiting to BDO Functions  Menu ....");
@@ -158,7 +160,7 @@ public class MgneraApp {
     }
     
     // manage projects
-        public void manageProjects(Scanner sc) throws ProjectException{
+        public void manageProjects(Scanner sc) throws ProjectException, LoginException{
             while(true){
         System.out.println("""
                            
@@ -185,7 +187,7 @@ public class MgneraApp {
               case 4 ->
                   bdo.deleteProject();
                case 5 -> 
-                  bdo.viewAllGPMs();
+                  bdo.viewAllProjects();
                case 6 ->
                    bdo.allocateProjectToGPM();
                case 7 ->
@@ -252,8 +254,10 @@ public class MgneraApp {
                 gpm.createEmployee();
             case 2 -> 
                 gpm.viewEmployeeDetails();
-            case 3 -> System.out.println("Allocate Employee to a Project functionality");
-            case 4 -> System.out.println("View Employee Work functionality");
+            case 3 -> 
+                gpm.allocateEmployeeToProject();
+            case 4 -> 
+                gpm.viewEmployeeWork();
             case 5 -> gpmMenu(sc);
             default -> {
                 System.out.println("Invalid choice! Please select a valid option.");

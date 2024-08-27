@@ -171,5 +171,131 @@ public void allocateProjectToGPM(int projectId, String gpmUsername) throws Proje
     return employees;
 }
 
-    
+    public UserModel searchGPM(String username) throws SQLException, LoginException {
+    Connection con = null;
+    PreparedStatement ppst = null;
+    ResultSet rs = null;
+    UserModel gpm = null;
+
+    try {
+        con = ud.doConnect();
+
+        // Search for the GPM by username
+        String searchQuery = "SELECT * FROM users WHERE username = ? AND role = 'GPM'";
+        ppst = con.prepareStatement(searchQuery);
+        ppst.setString(1, username);
+
+        rs = ppst.executeQuery();
+
+        if (rs.next()) {
+            // If GPM is found, create a UserModel object and populate it with the data
+            gpm = new UserModel();
+            gpm.setUsername(rs.getString("username"));
+            gpm.setPhoneNo(rs.getString("phoneNo"));
+            gpm.setEmail(rs.getString("email"));
+            gpm.setAddress(rs.getString("address"));
+            gpm.setRole(rs.getString("role"));
+        } else {
+            throw new LoginException("GPM with username '" + username + "' not found.");
+        }
+
+    } catch (SQLException e) {
+        throw new SQLException("Database error: " + e.getMessage());
+    } finally {
+        try {
+            if (rs != null) rs.close();
+            if (ppst != null) ppst.close();
+            if (con != null) con.close();
+        } catch (SQLException e) {
+            // Handle exception
+        }
+    }
+
+    return gpm;
+}
+public void deleteGPM(String username) throws SQLException, LoginException {
+    Connection con = null;
+    PreparedStatement ppst = null;
+
+    try {
+        con = ud.doConnect();
+
+        // Check if the GPM exists and has the role of GPM
+        String checkQuery = "SELECT username FROM users WHERE username = ? AND role = 'GPM'";
+        ppst = con.prepareStatement(checkQuery);
+        ppst.setString(1, username);
+        ResultSet rs = ppst.executeQuery();
+
+        if (!rs.next()) {
+            throw new LoginException("GPM with username " + username + " does not exist.");
+        }
+
+        // Delete the GPM
+        String deleteQuery = "DELETE FROM users WHERE username = ?";
+        ppst = con.prepareStatement(deleteQuery);
+        ppst.setString(1, username);
+
+        int rowsAffected = ppst.executeUpdate();
+        if (rowsAffected > 0) {
+            System.out.println("GPM deleted successfully!");
+        } else {
+            throw new LoginException("Failed to delete the GPM. Please try again.");
+        }
+
+    } catch (SQLException e) {
+        throw new SQLException("Database error: " + e.getMessage());
+    } finally {
+        try {
+            if (ppst != null) ppst.close();
+            if (con != null) con.close();
+        } catch (SQLException e) {
+            // Handle exception
+        }
+    }
+}
+
+public void updateGPM(UserModel gpm) throws SQLException, LoginException {
+    Connection con = null;
+    PreparedStatement ppst = null;
+
+    try {
+        con = ud.doConnect();
+
+        // Check if the GPM exists and has the role of GPM
+        String checkQuery = "SELECT username FROM users WHERE username = ? AND role = 'GPM'";
+        ppst = con.prepareStatement(checkQuery);
+        ppst.setString(1, gpm.getUsername());
+        ResultSet rs = ppst.executeQuery();
+
+        if (!rs.next()) {
+            throw new LoginException("GPM with username " + gpm.getUsername() + " does not exist.");
+        }
+
+        // Update the GPM details
+        String updateQuery = "UPDATE users SET phoneNo = ?, email = ?, address = ? WHERE username = ?";
+        ppst = con.prepareStatement(updateQuery);
+        ppst.setString(1, gpm.getPhoneNo());
+        ppst.setString(2, gpm.getEmail());
+        ppst.setString(3, gpm.getAddress());
+        ppst.setString(4, gpm.getUsername());
+
+        int rowsAffected = ppst.executeUpdate();
+        if (rowsAffected > 0) {
+            System.out.println("GPM updated successfully!");
+        } else {
+            throw new LoginException("Failed to update the GPM. Please try again.");
+        }
+
+    } catch (SQLException e) {
+        throw new SQLException("Database error: " + e.getMessage());
+    } finally {
+        try {
+            if (ppst != null) ppst.close();
+            if (con != null) con.close();
+        } catch (SQLException e) {
+            // Handle exception
+        }
+    }
+}
+
 }

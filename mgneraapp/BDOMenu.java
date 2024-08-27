@@ -7,6 +7,7 @@ import exceptions.LoginException;
 import exceptions.SignUpException;
 import models.ProjectModel;
 import models.UserModel;
+import java.sql.SQLException;
 import exceptions.ProjectException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -18,6 +19,7 @@ public class BDOMenu {
     private final Scanner sc = new Scanner(System.in);
     private final UserDAO ud = new UserDAO();
     private final ProjectDAO pd = new ProjectDAO(); 
+    private final BDODAO bd =new BDODAO();
     private final SignUpException se = new SignUpException("");
     private final LoginException le = new LoginException("");
     private static final String STATUS_PENDING = "Pending";
@@ -69,49 +71,49 @@ public class BDOMenu {
     String password = sc.nextLine();
 
     UserModel user = ud.login(username, password);
-    loggedInUserRole = user.getRole();  // Store the role of the logged-in user
-    System.out.println("Login successful as " + loggedInUserRole);
+//    loggedInUserRole = user.getRole();  // Store the role of the logged-in user
+//    System.out.println("Login successful as " + loggedInUserRole);
 }
-    public void showMenu() throws ProjectException {
-        while (true) {
-            System.out.println("1. Create Project");
-            System.out.println("2. View Project");
-            System.out.println("3. Create New GPM");
-            System.out.println("4. View All GPM");
-            System.out.println("5. Allocate Project to GPM");
-            System.out.println("6. See Employees");
-            System.out.println("7. Exit");
-
-            int choice = sc.nextInt();
-            sc.nextLine();  // Consume newline
-
-            switch (choice) {
-                case 1:
-                    createProject();
-                    break;
-                case 2:
-                    viewProject();
-                    break;
-                case 3:
-                    createNewGPM();
-                    break;
-                case 4:
-                    viewAllGPMs();
-                    break;
-                case 5:
-                    allocateProjectToGPM();
-                    break;
-                case 6:
-                    seeEmployees();
-                    break;
-                case 7:
-                    System.out.println("Exiting...");
-                    return;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
-            }
-        }
-    }
+//    public void showMenu() throws ProjectException {
+//        while (true) {
+//            System.out.println("1. Create Project");
+//            System.out.println("2. View Project");
+//            System.out.println("3. Create New GPM");
+//            System.out.println("4. View All GPM");
+//            System.out.println("5. Allocate Project to GPM");
+//            System.out.println("6. See Employees");
+//            System.out.println("7. Exit");
+//
+//            int choice = sc.nextInt();
+//            sc.nextLine();  // Consume newline
+//
+//            switch (choice) {
+//                case 1:
+//                    createProject();
+//                    break;
+//                case 2:
+//                    viewProject();
+//                    break;
+//                case 3:
+//                    createNewGPM();
+//                    break;
+//                case 4:
+//                    viewAllGPMs();
+//                    break;
+//                case 5:
+//                    allocateProjectToGPM();
+//                    break;
+//                case 6:
+//                    seeEmployees();
+//                    break;
+//                case 7:
+//                    System.out.println("Exiting...");
+//                    return;
+//                default:
+//                    System.out.println("Invalid choice. Please try again.");
+//            }
+//        }
+//    }
 
     public void createProject() {
         ProjectModel project = new ProjectModel();
@@ -215,7 +217,7 @@ public void createNewGPM() {
     }
 }
 
-private void viewAllProjects() {
+public void viewAllProjects() {
     try {
         List<ProjectModel> projects = pd.getAllProjects();
         if (projects.isEmpty()) {
@@ -282,29 +284,148 @@ private void viewAllProjects() {
     }
 }
 
-    void searchGPM() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    public void searchGPM() {
+    Scanner sc = new Scanner(System.in);
 
-    void updateGPM() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    System.out.println("Enter the GPM username to search:");
+    String username = sc.nextLine();
 
-    void deleteGPM() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    try {
+        // Assuming ud is an instance of UserDAO or equivalent
+        UserModel gpm = bd.searchGPM(username);
+
+        if (gpm != null) {
+            System.out.println("GPM Details:");
+            System.out.println("Username: " + gpm.getUsername());
+            System.out.println("Phone Number: " + gpm.getPhoneNo());
+            System.out.println("Email: " + gpm.getEmail());
+            System.out.println("Address: " + gpm.getAddress());
+            System.out.println("Role: " + gpm.getRole());
+        }
+
+    } catch (SQLException | LoginException e) {
+        System.out.println("Error: " + e.getMessage());
     }
+}
+
+
+   public void updateGPM() {
+    Scanner sc = new Scanner(System.in);
+
+    System.out.println("Enter the GPM username to update:");
+    String username = sc.nextLine();
+
+    try {
+        UserModel gpm = bd.searchGPM(username); // Fetch the GPM details
+
+        if (gpm == null) {
+            System.out.println("GPM with username " + username + " does not exist.");
+            return;
+        }
+
+        // Display current details and prompt for changes
+        System.out.println("Current Phone Number: " + gpm.getPhoneNo());
+        System.out.println("Enter new Phone Number (leave blank to keep unchanged):");
+        String phoneNo = sc.nextLine();
+        if (!phoneNo.isEmpty()) {
+            gpm.setPhoneNo(phoneNo);
+        }
+
+        System.out.println("Current Email: " + gpm.getEmail());
+        System.out.println("Enter new Email (leave blank to keep unchanged):");
+        String email = sc.nextLine();
+        if (!email.isEmpty()) {
+            gpm.setEmail(email);
+        }
+
+        System.out.println("Current Address: " + gpm.getAddress());
+        System.out.println("Enter new Address (leave blank to keep unchanged):");
+        String address = sc.nextLine();
+        if (!address.isEmpty()) {
+            gpm.setAddress(address);
+        }
+
+        // Update the GPM details in the database
+        bd.updateGPM(gpm);
+        
+    } catch (SQLException | LoginException e) {
+        System.out.println("Error: " + e.getMessage());
+    }
+}
+
+
+ public void deleteGPM() {
+    Scanner sc = new Scanner(System.in);
+
+    System.out.println("Enter the GPM username to delete:");
+    String username = sc.nextLine();
+
+    try {
+        // Assuming gpmDao is an instance of GPMDAO or equivalent
+        bd.deleteGPM(username);
+
+    } catch (SQLException | LoginException e) {
+        System.out.println("Error: " + e.getMessage());
+    }
+}
+
 
     void searchProjectById() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+         System.out.println("Enter project ID to view: ");
+    int projectId = sc.nextInt();
+    sc.nextLine();  // Consume the newline
+
+    try {
+        ProjectModel project = pd.getProjectById(projectId);
+        if (project != null) {
+            System.out.println(project);
+        } else {
+            System.out.println("Project not found.");
+        }
+    } catch (ProjectException e) {
+        System.out.println(e.getMessage());
+    }
     }
 
-    void updateProject() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+   public void updateProject() {
+    Scanner sc = new Scanner(System.in);
 
-    void deleteProject() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    System.out.println("Enter the project ID to update:");
+    int projectId = sc.nextInt();
+    sc.nextLine();  // Consume newline
+
+    System.out.println("Enter the new project name:");
+    String newName = sc.nextLine();
+
+    System.out.println("Enter the new project description:");
+    String newDescription = sc.nextLine();
+
+    System.out.println("Enter the new project status:");
+    String newStatus = sc.nextLine();
+
+    try {
+        // Assuming pd is an instance of ProjectDAO or equivalent
+        pd.updateProject(projectId, newName, newDescription, newStatus);
+    } catch (ProjectException e) {
+        System.out.println("Error: " + e.getMessage());
     }
+}
+
+
+   public void deleteProject() {
+    Scanner sc = new Scanner(System.in);
+
+    System.out.println("Enter the project ID to delete:");
+    int projectId = sc.nextInt();
+
+    try {
+        pd.deleteProject(projectId);
+
+    } catch (ProjectException e) {
+        System.out.println("Error: " + e.getMessage());
+    }
+}
+
 
   
 }

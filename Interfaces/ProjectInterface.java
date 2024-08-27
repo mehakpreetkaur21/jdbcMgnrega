@@ -22,7 +22,7 @@ public interface ProjectInterface {
     ProjectModel viewProject(int projectId) throws ProjectException;
     
     // Method to update an existing project
-    void updateProject(ProjectModel project) throws ProjectException;
+    void updateProject(int projectId, String newName, String newDescription, String newStatus) throws ProjectException;
     
     // Method to delete a project by ID
     void deleteProject(int projectId) throws ProjectException;

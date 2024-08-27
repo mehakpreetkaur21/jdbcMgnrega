@@ -21,42 +21,6 @@ public class GPMMenu {
     private final SignUpException se = new SignUpException("");
     private final LoginException le = new LoginException("");
 
-//    public void signup() {
-//        boolean isValidUsername = false;
-//
-//        while (!isValidUsername) {
-//            System.out.println("Enter the username:");
-//            String username = sc.nextLine();
-//            if (se.checkAvailUsername(username)) {
-//                um.setUsername(username);
-//                isValidUsername = true;
-//            } else {
-//                System.out.println("Username " + username + " is already assigned. Please try with a new username.");
-//            }
-//        }
-//
-//        System.out.println("Enter the password:");
-//        um.setPassword(sc.nextLine());
-//
-//        System.out.println("Enter the phone Number:");
-//        um.setPhoneNo(sc.nextLine());
-//
-//        System.out.println("Enter the email id:");
-//        um.setEmail(sc.nextLine());
-//
-//        System.out.println("Enter the address:");
-//        um.setAddress(sc.nextLine());
-//
-//        um.setRole("GPM");
-//
-//        try {
-//            ud.signUp(um);
-//        } catch (SignUpException se) {
-//            System.out.println(se.getMessage());
-//        }
-//    }
-
-    
     
     public void login() throws LoginException {
         System.out.println("Enter the username:");
@@ -124,6 +88,28 @@ public class GPMMenu {
         System.out.println("Error: " + e.getMessage());
     }
 }
+
+   public void allocateEmployeeToProject() {
+    Scanner sc = new Scanner(System.in);
+
+    System.out.println("Enter the employee's username to allocate:");
+    String username = sc.nextLine();
+
+    System.out.println("Enter the project ID to allocate the employee to:");
+    int projectId = sc.nextInt();
+
+    try {
+        gd.allocateEmployeeToProject(username, projectId); // Call the DAO method to allocate
+
+    } catch ( LoginException e) {
+        System.out.println("Error: " + e.getMessage());
+    }
+}
+
+
+    void viewEmployeeWork() {
+        System.out.println("not implemented yet");
+    }
 
 
 }

@@ -19,6 +19,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import models.ProjectModel;
 
 public class ProjectDAO implements ProjectInterface {
@@ -95,36 +97,58 @@ public void createProject(ProjectModel project) throws ProjectException {
         }
         return project;
     }
+   @Override
+    public void updateProject(int projectId, String newName, String newDescription, String newStatus) throws ProjectException {
+    Connection con = null;
+    PreparedStatement ppst = null;
 
-    @Override
-    public void updateProject(ProjectModel project) throws ProjectException {
-        try {
-            con = doConnect();
-            query = "UPDATE projects SET project_name = ?, description = ?, start_date = ?, end_date = ?, status = ? WHERE project_id = ?;";
-            ppst = con.prepareStatement(query);
-            ppst.setString(1, project.getProjectName());
-            ppst.setString(2, project.getDescription());
-            ppst.setString(5, project.getStatus());
-            ppst.setInt(6, project.getProjectId());
+    try {
+        con = doConnect();
 
-            int result = ppst.executeUpdate();
-
-            if (result > 0) {
-                System.out.println("Project updated successfully!");
-            } else {
-                throw new ProjectException("Failed to update project. Please try again.");
-            }
-        } catch (SQLException e) {
-            throw new ProjectException("Database error: " + e.getMessage());
-        } finally {
+        // Check if the project exists
+        String checkProjectQuery = "SELECT COUNT(*) FROM projects WHERE project_id = ?";
+        ppst = con.prepareStatement(checkProjectQuery);
+        ppst.setInt(1, projectId);
+        ResultSet rs = ppst.executeQuery();
+        if (rs.next() && rs.getInt(1) == 0) {
             try {
-                if (ppst != null) ppst.close();
-                if (con != null) con.close();
-            } catch (SQLException e) {
-                // Log or handle exception
+                throw new ProjectException("Project not found.");
+            } catch (ProjectException ex) {
+                Logger.getLogger(ProjectDAO.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+
+        // Update the project details
+        String updateQuery = "UPDATE projects SET project_name = ?, description = ?, status = ? WHERE project_id = ?";
+        ppst = con.prepareStatement(updateQuery);
+        ppst.setString(1, newName);
+        ppst.setString(2, newDescription);
+        ppst.setString(3, newStatus);
+        ppst.setInt(4, projectId);
+
+        int result = ppst.executeUpdate();
+
+        if (result > 0) {
+            System.out.println("Project updated successfully!");
+        } else {
+            throw new SQLException("Failed to update the project. Please try again.");
+        }
+
+    } catch (SQLException e) {
+        try {
+            throw new SQLException("Database error: " + e.getMessage());
+        } catch (SQLException ex) {
+            Logger.getLogger(ProjectDAO.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    } finally {
+        try {
+            if (ppst != null) ppst.close();
+            if (con != null) con.close();
+        } catch (SQLException e) {
+            // Handle exception
+        }
     }
+}
 
     @Override
     public void deleteProject(int projectId) throws ProjectException {
@@ -187,7 +211,35 @@ public void createProject(ProjectModel project) throws ProjectException {
 
     @Override
     public ProjectModel getProjectById(int projectId) throws ProjectException {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+        ProjectModel project = null;
+        try {
+            con = doConnect();
+            query = "SELECT * FROM projects WHERE project_id = ?;";
+            ppst = con.prepareStatement(query);
+            ppst.setInt(1, projectId);
+            rs = ppst.executeQuery();
+
+            if (rs.next()) {
+                project = new ProjectModel();
+                project.setProjectId(rs.getInt("project_id"));
+                project.setProjectName(rs.getString("project_name"));
+                project.setDescription(rs.getString("description"));
+                project.setStatus(rs.getString("status"));
+            } else {
+                throw new ProjectException("Project not found.");
+            }
+        } catch (SQLException e) {
+            throw new ProjectException("Database error: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (ppst != null) ppst.close();
+                if (con != null) con.close();
+            } catch (SQLException e) {
+                // Log or handle exception
+            }
+        }
+        return project;
+        }
 }
 
